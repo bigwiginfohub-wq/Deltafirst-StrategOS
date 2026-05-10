@@ -14,14 +14,14 @@ app.add_middleware(
 )
 
 # Mode 3 passphrase hash (DeltaMode3)
-CORRECT_HASH = "6c4be6fabdafd60bd766b15b572d67f26006e52723a58f521900cb47234aed7d"
+CORRECT_HASH = "5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8"
 
 class VerifyRequest(BaseModel):
     passphrase: str
 
 @app.get("/")
 def root():
-    return {"message": "Mode 3 Verification API"}
+    return {"message": "Mode 3 Verification API is running"}
 
 @app.post("/verify")
 def verify(request: VerifyRequest):
