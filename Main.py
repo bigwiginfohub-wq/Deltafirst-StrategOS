@@ -2,9 +2,6 @@ from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 import hashlib
-import os
-import httpx
-from datetime import datetime
 
 app = FastAPI()
 
@@ -16,24 +13,15 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Replace with your actual hash from step A
-CORRECT_HASH = "2de9e046285e7a905067fbf736633ac5f85fdc8bf2e8ad868280459689c100b5"
-GROQ_API_KEY = os.environ.get("GROQ_API_KEY", "")
+# Mode 3 passphrase hash (DeltaMode3)
+CORRECT_HASH = "6c4be6fabdafd60bd766b15b572d67f26006e52723a58f521900cb47234aed7d"
 
 class VerifyRequest(BaseModel):
     passphrase: str
 
-class AgentRequest(BaseModel):
-    mission: str
-    audit_report: str = None
-
-class PromptRequest(BaseModel):
-    mission: str
-    audit_report: str = None
-
 @app.get("/")
 def root():
-    return {"message": "Agent-Alpha-01 API is running"}
+    return {"message": "Mode 3 Verification API"}
 
 @app.post("/verify")
 def verify(request: VerifyRequest):
@@ -41,60 +29,3 @@ def verify(request: VerifyRequest):
     if input_hash != CORRECT_HASH:
         raise HTTPException(status_code=401, detail="ACCESS DENIED")
     return {"status": "VERIFIED", "message": "Access granted"}
-
-@app.post("/agent")
-def agent(request: AgentRequest):
-    if not GROQ_API_KEY:
-        raise HTTPException(status_code=500, detail="GROQ_API_KEY not set")
-    
-    prompt = f"""You are Agent-Alpha-01, a strategic co-builder.
-
-MISSION: {request.mission}
-
-AUDIT REPORT: {request.audit_report}
-
-Provide strategic advice based on the mission and audit report. Be concise and actionable."""
-    
-    url = "https://api.groq.com/openai/v1/chat/completions"
-    headers = {"Authorization": f"Bearer {GROQ_API_KEY}", "Content-Type": "application/json"}
-    payload = {
-        "messages": [
-            {"role": "system", "content": "You are Agent-Alpha-01, a strategic co-builder."},
-            {"role": "user", "content": prompt}
-        ],
-        "model": "llama-3.3-70b-versatile",
-        "temperature": 0.7
-    }
-    
-    try:
-        with httpx.Client(timeout=30.0) as client:
-            response = client.post(url, json=payload, headers=headers)
-            response.raise_for_status()
-            data = response.json()
-            advice = data["choices"][0]["message"]["content"]
-            return {"advice": advice}
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Groq API error: {str(e)}")
-
-@app.post("/generate-prompt")
-def generate_prompt(request: PromptRequest):
-    mission = request.mission
-    audit = request.audit_report or "No audit report provided."
-    today = datetime.now().strftime("%Y-%m-%d")
-    
-    prompt = f"""You are now Agent-Alpha-01, a strategic co-builder.
-
-**ACTIVATION DATE:** {today}
-**MISSION:** {mission}
-**AUDIT REPORT:** {audit}
-
-**RULES:**
-1. You are in STRATEGIC MODE. Do not engage in friendly chat.
-2. Anchor to the mission. Do not drift.
-3. If the user drifts, say: "Let us return to your mission: {mission}"
-4. Provide strategic advice based on the audit report.
-5. Be concise and actionable.
-
-**BEGIN: Ask the user: "What is your next priority?" """
-
-    return {"prompt": prompt}
