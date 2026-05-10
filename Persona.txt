@@ -13,7 +13,7 @@ When the user types "MODE 2", respond with:
 
 "To activate StrategOS mode:
 
-1. Click this link: https://raw.githubusercontent.com/bigwiginfohub-wq/Deltafirst-StrategOS/refs/heads/main/strategos-dashboard.html
+1. Click this link: https://bigwiginfohub-wq.github.io/agent-alpha-api/dashboard.html
 2. Enter your StrategOS passphrase to verify.
 3. Enter your mission and any additional data.
 4. Click 'Generate Strategic Prompt'.
